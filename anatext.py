@@ -62,59 +62,40 @@ if 'topic_details' not in st.session_state:
 
 # --- CSS CUSTOM (SMART CONTRAST) ---
 def inject_custom_css(mode):
-    # Definisi Warna Berbasis Mode
     if mode == 'Dark':
         bg_color = "#0e1117"
         sidebar_bg = "#262730"
         text_color = "#ffffff"
-        text_secondary = "#e0e0e0"
+        text_secondary = "#b0b0b0"
         input_bg = "#41444C"
         border_col = "#555"
         btn_txt = "#ffffff"
+        card_bg = "#262730"
     else:
         bg_color = "#ffffff"
         sidebar_bg = "#f0f2f6"
         text_color = "#000000"
-        text_secondary = "#31333F"
+        text_secondary = "#555555"
         input_bg = "#ffffff"
         border_col = "#d1d5db"
-        btn_txt = "#ffffff" # Tombol primary biasanya tetap teks putih
+        btn_txt = "#ffffff"
+        card_bg = "#f9f9f9"
 
     st.markdown(f"""
     <style>
-        /* Global Background & Text */
         .stApp {{ background-color: {bg_color}; color: {text_color}; }}
         
-        /* Sidebar Specific */
-        [data-testid="stSidebar"] {{
-            background-color: {sidebar_bg};
-        }}
-        [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {{
-            color: {text_color} !important;
-        }}
+        [data-testid="stSidebar"] {{ background-color: {sidebar_bg}; }}
+        [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {{ color: {text_color} !important; }}
         
-        /* Text Elements Contrast */
-        p, h1, h2, h3, h4, h5, h6, li, span, div, label {{
-            color: {text_color};
-        }}
+        p, h1, h2, h3, h4, h5, h6, li, span, div, label {{ color: {text_color}; }}
         .stMarkdown {{ color: {text_color} !important; }}
         
-        /* Inputs (Selectbox, Text Input) */
-        .stTextInput > div > div > input {{
-            color: {text_color};
-            background-color: {input_bg};
-        }}
-        .stSelectbox > div > div {{
-            background-color: {input_bg};
-            color: {text_color};
-        }}
-        /* Fix dropdown text visibility */
-        div[data-baseweb="select"] > div {{
-            background-color: {input_bg};
-            color: {text_color};
-        }}
+        /* Inputs */
+        .stTextInput > div > div > input {{ color: {text_color}; background-color: {input_bg}; }}
+        div[data-baseweb="select"] > div {{ background-color: {input_bg}; color: {text_color}; }}
         
-        /* Drag & Drop Area */
+        /* Upload Area */
         [data-testid='stFileUploader'] {{
             background-color: {sidebar_bg};
             border: 2px dashed #4c7bf4;
@@ -124,32 +105,66 @@ def inject_custom_css(mode):
         }}
         
         /* Buttons */
-        .stButton button {{
-            font-weight: bold;
-            color: {btn_txt} !important;
+        .stButton button {{ font-weight: bold; color: {btn_txt} !important; }}
+        
+        /* Footer */
+        .footer-text {{
+            text-align: center; font-size: 12px; color: {text_secondary};
+            margin-top: 50px; border-top: 1px solid {border_col}; padding-top: 10px;
         }}
         
-        /* Footer Styling */
-        .footer-text {{
-            text-align: center;
-            font-size: 12px;
-            color: {text_secondary};
-            margin-top: 50px;
-            border-top: 1px solid {border_col};
-            padding-top: 10px;
-        }}
-
-        /* Table Styling fixes */
-        [data-testid="stDataFrame"] {{
-             border: 1px solid {border_col};
-        }}
+        /* Table */
+        [data-testid="stDataFrame"] {{ border: 1px solid {border_col}; }}
     </style>
     """, unsafe_allow_html=True)
     
     return "plotly_dark" if mode == 'Dark' else "plotly_white"
 
-# --- FUNGSI UTAMA ---
+# --- FUNGSI HEADER ELEGAN (NEW) ---
+def render_elegant_header(mode):
+    # Tentukan warna teks berdasarkan mode
+    if mode == 'Dark':
+        title_color = "#ffffff"
+        subtitle_color = "#d0d0d0"
+    else:
+        title_color = "#1a1a1a"
+        subtitle_color = "#555555"
 
+    st.markdown(f"""
+    <div style="text-align: center; margin-bottom: 40px; padding-top: 20px;">
+        <div style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 140, 255, 0.3);
+            margin-bottom: 15px;
+        ">
+            <span style="font-size: 40px; color: white;">📊</span>
+        </div>
+        <h1 style="
+            color: {title_color};
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-weight: 800;
+            font-size: 3rem;
+            margin: 0;
+            letter-spacing: -1px;
+            line-height: 1.2;
+        ">AnaText</h1>
+        <p style="
+            color: {subtitle_color};
+            font-size: 1.2rem;
+            margin-top: 10px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        ">Platform Analisis Teks Berbasis AI</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# --- FUNGSI UTAMA ---
 def clean_text(text, remove_sw, use_lemma, case_folding, stopwords_list, stemmer):
     if not isinstance(text, str): return ""
     if case_folding: text = text.lower()
@@ -164,16 +179,11 @@ def get_sentiment_ai(client, model, text_list):
     progress_bar = st.progress(0)
     total = len(text_list)
     for i, text in enumerate(text_list):
-        if not text.strip():
-            results.append("Netral")
-            continue 
+        if not text.strip(): results.append("Netral"); continue 
         try:
             response = client.chat.completions.create(
                 model=model,
-                messages=[
-                    {"role": "system", "content": "Klasifikasikan sentimen: Positif, Negatif, atau Netral. Jawab 1 kata saja."},
-                    {"role": "user", "content": text}
-                ],
+                messages=[{"role": "system", "content": "Klasifikasikan sentimen: Positif, Negatif, atau Netral. Jawab 1 kata saja."}, {"role": "user", "content": text}],
                 temperature=0, max_tokens=10
             )
             sentiment = response.choices[0].message.content.strip().replace(".", "")
@@ -190,10 +200,8 @@ def get_topic_name_ai(client, model, keywords):
     try:
         response = client.chat.completions.create(
             model=model,
-            messages=[
-                {"role": "system", "content": "Berikan nama topik singkat (2-4 kata) yang merepresentasikan keywords ini."},
-                {"role": "user", "content": f"Keywords: {', '.join(keywords)}"}
-            ]
+            messages=[{"role": "system", "content": "Berikan nama topik singkat (2-4 kata) dari keyword ini."}, {"role": "user", "content": f"Keywords: {', '.join(keywords)}"}],
+            temperature=0.3
         )
         return response.choices[0].message.content.replace('"', '')
     except: return "Topik Umum"
@@ -201,35 +209,26 @@ def get_topic_name_ai(client, model, keywords):
 def generate_text_network(topic_details, theme_mode):
     G = nx.Graph()
     colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#F1948A', '#82E0AA', '#85C1E9']
-    
     labels = {}
     
     for idx, detail in enumerate(topic_details):
         topic_name = detail['Topik']
         keywords = detail['Keywords'].split(', ')
         cluster_color = colors[idx % len(colors)]
-        
         G.add_node(topic_name, size=2000, color=cluster_color, type='topic')
         labels[topic_name] = topic_name
-        
         for kw in keywords:
-            if not G.has_node(kw):
-                G.add_node(kw, size=500, color=cluster_color, type='keyword')
-                labels[kw] = kw
+            if not G.has_node(kw): G.add_node(kw, size=500, color=cluster_color, type='keyword'); labels[kw] = kw
             G.add_edge(topic_name, kw)
 
     plt.figure(figsize=(12, 8), facecolor='#0e1117' if theme_mode=='Dark' else '#ffffff')
     pos = nx.spring_layout(G, k=0.5, seed=42)
-    
     final_colors = [G.nodes[n]['color'] for n in G.nodes()]
     node_sizes = [G.nodes[n]['size'] for n in G.nodes()]
-    
     nx.draw_networkx_nodes(G, pos, nodelist=G.nodes(), node_color=final_colors, alpha=0.9, node_size=node_sizes)
     nx.draw_networkx_edges(G, pos, width=1.0, alpha=0.5, edge_color='gray')
-    
     font_color = 'white' if theme_mode=='Dark' else 'black'
     nx.draw_networkx_labels(G, pos, labels, font_size=8, font_color=font_color, font_weight='bold')
-    
     plt.axis('off')
     return plt
 
@@ -267,30 +266,29 @@ with st.sidebar:
     
     st.divider()
     st.subheader("🔧 Preprocessing")
-    check_sw = st.checkbox("Hapus Stop Words", value=True, help="Menghapus kata-kata umum yang sering muncul tapi minim makna (contoh: yang, di, ke, dari).")
-    check_lemma = st.checkbox("Aktifkan Lemmatization", value=True, help="Mengubah kata berimbuhan menjadi kata dasar (contoh: 'memakan' menjadi 'makan') menggunakan algoritma Sastrawi.")
-    check_lower = st.checkbox("Case Folding (lowercase)", value=True, help="Mengubah semua huruf dalam teks menjadi huruf kecil agar seragam.")
+    check_sw = st.checkbox("Hapus Stop Words", value=True, help="Menghapus kata umum minim makna.")
+    check_lemma = st.checkbox("Aktifkan Lemmatization", value=True, help="Ubah kata berimbuhan jadi kata dasar.")
+    check_lower = st.checkbox("Case Folding (lowercase)", value=True, help="Ubah ke huruf kecil.")
     
     if hasattr(st, "dialog"):
         if st.button("Kelola Stop Words", use_container_width=True): open_stopwords_modal()
     else:
         with st.expander("Kelola Stop Words"): show_stopwords_manager()
     
-    # REVISI 4: FOOTER DI SIDEBAR
     st.markdown("---")
     st.markdown('<div class="footer-text">Developed by <b>Suwarno</b><br>Powered by <b>Open AI</b></div>', unsafe_allow_html=True)
 
 # --- MAIN UI ---
-col_logo, col_title = st.columns([1, 12])
-with col_title: st.title("📊 AnaText") 
-st.write("Platform Analisis Teks Berbasis AI")
+
+# Memanggil Fungsi Header Baru (Tengah & Elegan)
+render_elegant_header(theme_mode)
 
 try: api_key = st.secrets["OPENAI_API_KEY"]
 except: api_key = "" 
 client = OpenAI(api_key=api_key) if api_key else None
 MODEL_NAME = "gpt-4o"
 
-# --- INPUT ---
+# --- INPUT AREA ---
 container_input = st.container()
 with container_input:
     tab_upload, tab_text = st.tabs(["📂 Unggah Dokumen", "✍️ Teks Langsung"])
@@ -359,15 +357,9 @@ if st.button("🚀 Lakukan Analisis", type="primary"):
                 center = kmeans.cluster_centers_[i]
                 top_idx = center.argsort()[-10:][::-1] 
                 top_w = [feats[x] for x in top_idx]
-                
                 label = get_topic_name_ai(client, MODEL_NAME, top_w[:5]) if top_w else f"Topik {i+1}"
                 topic_map[i] = label
-                
-                topic_data_list.append({
-                    'Nomor': i+1,
-                    'Topik': label,
-                    'Keywords': ", ".join(top_w)
-                })
+                topic_data_list.append({'Nomor': i+1, 'Topik': label, 'Keywords': ", ".join(top_w)})
             
             df['Topik'] = df['Cluster_ID'].map(topic_map)
             df['Sentimen'] = get_sentiment_ai(client, MODEL_NAME, df['Teks_Asli'].tolist())
@@ -391,7 +383,6 @@ if st.session_state.analysis_done and st.session_state.data is not None:
     m2.metric("Dominasi Sentimen", sc.idxmax() if not sc.empty else "-")
     m3.metric("Jumlah Topik", df['Topik'].nunique())
     
-    # REVISI 2: TAB ICONS
     t1, t2, t3, t4, t5 = st.tabs(["📝 Ringkasan", "🎭 Sentimen", "📂 Topik", "🔠 Kata Kunci", "🌐 Network Analysis"])
     
     with t1:
@@ -400,19 +391,18 @@ if st.session_state.analysis_done and st.session_state.data is not None:
             with st.spinner("AI sedang menyusun laporan lengkap..."):
                 try:
                     topics_str = "\n".join([f"- {t['Topik']}: {t['Keywords']}" for t in st.session_state.topic_details])
-                    # REVISI 5: Prompt Analisis Network
                     prompt = f"""
                     Bertindaklah sebagai Data Analyst Senior. Analisis data berikut:
                     KONTEKS: Tipe Teks: {text_type}. Total Data: {len(df)}. Sentimen: {sc.to_dict()}.
                     
                     JARINGAN TOPIK & KEYWORD (NETWORK ANALYSIS):
-                    Sistem telah mengelompokkan teks ke dalam topik-topik berikut beserta kata kuncinya (Keywords saling terhubung membentuk klaster):
+                    Sistem telah mengelompokkan teks ke dalam topik-topik berikut beserta kata kuncinya:
                     {topics_str}
                     
                     TUGAS: Buat Executive Summary (Bahasa Indonesia).
                     1. **Gambaran Umum**: Performa sentimen.
                     2. **Analisis Sentimen**: Mengapa sentimen dominan terjadi?
-                    3. **Interpretasi Network Analysis**: Jelaskan pola hubungan antar kata dan topik yang terbentuk dari data di atas. Bagaimana kata-kata kunci dalam satu topik saling berkaitan membentuk makna?
+                    3. **Interpretasi Network Analysis**: Jelaskan pola hubungan antar kata dan topik yang terbentuk. Bagaimana kata-kata kunci saling berkaitan membentuk makna?
                     4. **Kesimpulan & Rekomendasi**.
                     """
                     res = client.chat.completions.create(model=MODEL_NAME, messages=[{"role":"user", "content": prompt}])
@@ -422,8 +412,7 @@ if st.session_state.analysis_done and st.session_state.data is not None:
     with t2:
         c1, c2 = st.columns([1, 2])
         with c1:
-            fig = px.pie(values=sc.values, names=sc.index, hole=0.5, color=sc.index, 
-                         color_discrete_map=SENTIMENT_COLORS, template=plotly_template)
+            fig = px.pie(values=sc.values, names=sc.index, hole=0.5, color=sc.index, color_discrete_map=SENTIMENT_COLORS, template=plotly_template)
             st.plotly_chart(fig, use_container_width=True)
         with c2:
             f_s = st.multiselect("Filter:", df['Sentimen'].unique(), default=df['Sentimen'].unique())
@@ -441,18 +430,12 @@ if st.session_state.analysis_done and st.session_state.data is not None:
         st.plotly_chart(fig_bar, use_container_width=True)
         
         st.write("#### 📋 Detail Kata Kunci per Topik")
-        # REVISI 3: Desain Tabel Lebih Menarik (Interactive, No Index)
         df_topics = pd.DataFrame(st.session_state.topic_details)
-        st.dataframe(
-            df_topics, 
-            hide_index=True, 
-            use_container_width=True,
-            column_config={
-                "Nomor": st.column_config.NumberColumn("No.", width="small"),
-                "Topik": st.column_config.TextColumn("Nama Topik", width="medium"),
-                "Keywords": st.column_config.TextColumn("Kata Kunci (Keywords)", width="large")
-            }
-        )
+        st.dataframe(df_topics, hide_index=True, use_container_width=True, column_config={
+            "Nomor": st.column_config.NumberColumn("No.", width="small"),
+            "Topik": st.column_config.TextColumn("Nama Topik", width="medium"),
+            "Keywords": st.column_config.TextColumn("Kata Kunci (Keywords)", width="large")
+        })
 
     with t4:
         txt_all = " ".join(df['Teks_Clean'])
