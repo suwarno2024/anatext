@@ -14,7 +14,7 @@ import re
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(
     page_title="AnaText - AI Text Analysis",
-    page_icon="📊",
+    page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -464,3 +464,4 @@ if st.session_state.analysis_done and st.session_state.data is not None:
 
     st.divider()
     st.download_button("📥 Unduh CSV", df.to_csv(index=False).encode('utf-8'), "analisis_anatext.csv", "text/csv")
+
