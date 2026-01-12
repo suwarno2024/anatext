@@ -60,39 +60,92 @@ if 'analysis_done' not in st.session_state:
 if 'topic_details' not in st.session_state:
     st.session_state.topic_details = []
 
-# --- CSS CUSTOM ---
+# --- CSS CUSTOM (SMART CONTRAST) ---
 def inject_custom_css(mode):
+    # Definisi Warna Berbasis Mode
     if mode == 'Dark':
         bg_color = "#0e1117"
+        sidebar_bg = "#262730"
         text_color = "#ffffff"
-        card_bg = "#262730"
-        border_col = "#4c4e56"
-        metric_val_col = "#4cdbc4"
+        text_secondary = "#e0e0e0"
+        input_bg = "#41444C"
+        border_col = "#555"
+        btn_txt = "#ffffff"
     else:
         bg_color = "#ffffff"
+        sidebar_bg = "#f0f2f6"
         text_color = "#000000"
-        card_bg = "#f0f2f6"
+        text_secondary = "#31333F"
+        input_bg = "#ffffff"
         border_col = "#d1d5db"
-        metric_val_col = "#000000"
+        btn_txt = "#ffffff" # Tombol primary biasanya tetap teks putih
 
     st.markdown(f"""
     <style>
+        /* Global Background & Text */
         .stApp {{ background-color: {bg_color}; color: {text_color}; }}
-        p, h1, h2, h3, h4, h5, h6, li, span, div {{ color: {text_color}; }}
+        
+        /* Sidebar Specific */
+        [data-testid="stSidebar"] {{
+            background-color: {sidebar_bg};
+        }}
+        [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {{
+            color: {text_color} !important;
+        }}
+        
+        /* Text Elements Contrast */
+        p, h1, h2, h3, h4, h5, h6, li, span, div, label {{
+            color: {text_color};
+        }}
+        .stMarkdown {{ color: {text_color} !important; }}
+        
+        /* Inputs (Selectbox, Text Input) */
+        .stTextInput > div > div > input {{
+            color: {text_color};
+            background-color: {input_bg};
+        }}
+        .stSelectbox > div > div {{
+            background-color: {input_bg};
+            color: {text_color};
+        }}
+        /* Fix dropdown text visibility */
+        div[data-baseweb="select"] > div {{
+            background-color: {input_bg};
+            color: {text_color};
+        }}
+        
+        /* Drag & Drop Area */
         [data-testid='stFileUploader'] {{
-            background-color: {card_bg};
+            background-color: {sidebar_bg};
             border: 2px dashed #4c7bf4;
             border-radius: 10px;
             padding: 20px;
             text-align: center;
         }}
-        [data-testid="stMetricValue"] {{ color: {metric_val_col} !important; }}
-        .positive-bg {{background-color: #28a745; color: #ffffff; padding: 4px 8px; border-radius: 4px; font-weight: bold;}}
-        .negative-bg {{background-color: #dc3545; color: #ffffff; padding: 4px 8px; border-radius: 4px; font-weight: bold;}}
-        .neutral-bg {{background-color: #ffc107; color: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold;}}
-        .stButton button {{ font-weight: bold; }}
+        
+        /* Buttons */
+        .stButton button {{
+            font-weight: bold;
+            color: {btn_txt} !important;
+        }}
+        
+        /* Footer Styling */
+        .footer-text {{
+            text-align: center;
+            font-size: 12px;
+            color: {text_secondary};
+            margin-top: 50px;
+            border-top: 1px solid {border_col};
+            padding-top: 10px;
+        }}
+
+        /* Table Styling fixes */
+        [data-testid="stDataFrame"] {{
+             border: 1px solid {border_col};
+        }}
     </style>
     """, unsafe_allow_html=True)
+    
     return "plotly_dark" if mode == 'Dark' else "plotly_white"
 
 # --- FUNGSI UTAMA ---
@@ -146,50 +199,34 @@ def get_topic_name_ai(client, model, keywords):
     except: return "Topik Umum"
 
 def generate_text_network(topic_details, theme_mode):
-    """Membuat graf jaringan kata berdasarkan klaster topik."""
     G = nx.Graph()
-    
-    # Warna untuk setiap klaster (maks 10 klaster)
     colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#F1948A', '#82E0AA', '#85C1E9']
     
-    node_colors = []
     labels = {}
     
-    # Bangun Graf
     for idx, detail in enumerate(topic_details):
         topic_name = detail['Topik']
         keywords = detail['Keywords'].split(', ')
         cluster_color = colors[idx % len(colors)]
         
-        # Tambahkan node Topik (Pusat)
         G.add_node(topic_name, size=2000, color=cluster_color, type='topic')
         labels[topic_name] = topic_name
-        node_colors.append(cluster_color)
         
-        # Tambahkan node Keywords dan Edge
         for kw in keywords:
             if not G.has_node(kw):
                 G.add_node(kw, size=500, color=cluster_color, type='keyword')
                 labels[kw] = kw
-                node_colors.append(cluster_color) # Warna ikut klaster pertama yg ditemui
-            
             G.add_edge(topic_name, kw)
 
-    # Drawing
     plt.figure(figsize=(12, 8), facecolor='#0e1117' if theme_mode=='Dark' else '#ffffff')
     pos = nx.spring_layout(G, k=0.5, seed=42)
     
-    # Pisahkan node untuk sizing
-    topic_nodes = [n for n, d in G.nodes(data=True) if d['type'] == 'topic']
-    kw_nodes = [n for n, d in G.nodes(data=True) if d['type'] == 'keyword']
-    
-    # Ambil warna sesuai urutan node di G.nodes()
     final_colors = [G.nodes[n]['color'] for n in G.nodes()]
+    node_sizes = [G.nodes[n]['size'] for n in G.nodes()]
     
-    nx.draw_networkx_nodes(G, pos, nodelist=G.nodes(), node_color=final_colors, alpha=0.9, node_size=[G.nodes[n]['size'] for n in G.nodes()])
+    nx.draw_networkx_nodes(G, pos, nodelist=G.nodes(), node_color=final_colors, alpha=0.9, node_size=node_sizes)
     nx.draw_networkx_edges(G, pos, width=1.0, alpha=0.5, edge_color='gray')
     
-    # Label styling
     font_color = 'white' if theme_mode=='Dark' else 'black'
     nx.draw_networkx_labels(G, pos, labels, font_size=8, font_color=font_color, font_weight='bold')
     
@@ -222,7 +259,6 @@ with st.sidebar:
     st.divider()
     st.subheader("Bahasa & Teks")
     language = st.selectbox("Bahasa Teks", ["Indonesia", "Inggris"])
-    # REVISI 2: Update pilihan tipe teks
     text_type = st.selectbox("Tipe Teks", ["Umum", "Ulasan Produk", "Berita/Artikel", "Media Sosial", "Akademik"])
     
     st.divider()
@@ -231,7 +267,6 @@ with st.sidebar:
     
     st.divider()
     st.subheader("🔧 Preprocessing")
-    # REVISI 6: Tambahkan Tooltips
     check_sw = st.checkbox("Hapus Stop Words", value=True, help="Menghapus kata-kata umum yang sering muncul tapi minim makna (contoh: yang, di, ke, dari).")
     check_lemma = st.checkbox("Aktifkan Lemmatization", value=True, help="Mengubah kata berimbuhan menjadi kata dasar (contoh: 'memakan' menjadi 'makan') menggunakan algoritma Sastrawi.")
     check_lower = st.checkbox("Case Folding (lowercase)", value=True, help="Mengubah semua huruf dalam teks menjadi huruf kecil agar seragam.")
@@ -240,11 +275,14 @@ with st.sidebar:
         if st.button("Kelola Stop Words", use_container_width=True): open_stopwords_modal()
     else:
         with st.expander("Kelola Stop Words"): show_stopwords_manager()
+    
+    # REVISI 4: FOOTER DI SIDEBAR
+    st.markdown("---")
+    st.markdown('<div class="footer-text">Developed by <b>Suwarno</b><br>Powered by <b>Open AI</b></div>', unsafe_allow_html=True)
 
 # --- MAIN UI ---
 col_logo, col_title = st.columns([1, 12])
-# REVISI 1: Tambah Icon
-with col_title: st.title("📝 AnaText") 
+with col_title: st.title("📊 AnaText") 
 st.write("Platform Analisis Teks Berbasis AI")
 
 try: api_key = st.secrets["OPENAI_API_KEY"]
@@ -303,7 +341,7 @@ if st.button("🚀 Lakukan Analisis", type="primary"):
             df['Teks_Clean'] = clean_res
             df = df[df['Teks_Clean'].str.strip() != ""]
             
-            # Clustering & Topic Extraction
+            # Clustering
             k = min(num_clusters_input, len(df))
             if k < 2: k = 1
             
@@ -315,11 +353,10 @@ if st.button("🚀 Lakukan Analisis", type="primary"):
             df['Cluster_ID'] = kmeans.labels_
             
             topic_map = {}
-            topic_data_list = [] # Untuk Tabel
+            topic_data_list = []
             
             for i in range(k):
                 center = kmeans.cluster_centers_[i]
-                # REVISI 5: Ambil 5-10 keywords
                 top_idx = center.argsort()[-10:][::-1] 
                 top_w = [feats[x] for x in top_idx]
                 
@@ -336,7 +373,7 @@ if st.button("🚀 Lakukan Analisis", type="primary"):
             df['Sentimen'] = get_sentiment_ai(client, MODEL_NAME, df['Teks_Asli'].tolist())
             
             st.session_state.data = df
-            st.session_state.topic_details = topic_data_list # Simpan detail topik
+            st.session_state.topic_details = topic_data_list
             st.session_state.vectorizer = vec
             st.session_state.tfidf_matrix = tfidf
             st.session_state.analysis_done = True
@@ -354,36 +391,29 @@ if st.session_state.analysis_done and st.session_state.data is not None:
     m2.metric("Dominasi Sentimen", sc.idxmax() if not sc.empty else "-")
     m3.metric("Jumlah Topik", df['Topik'].nunique())
     
-    # REVISI 4: Tambah Tab Network Analysis
-    t1, t2, t3, t4, t5 = st.tabs(["Ringkasan", "Sentimen", "Topik", "Kata Kunci", "🌐 Network Analysis"])
+    # REVISI 2: TAB ICONS
+    t1, t2, t3, t4, t5 = st.tabs(["📝 Ringkasan", "🎭 Sentimen", "📂 Topik", "🔠 Kata Kunci", "🌐 Network Analysis"])
     
     with t1:
         st.info("Tekan tombol di bawah untuk mendapatkan analisis mendalam.")
         if st.button("Generate Comprehensive Summary"):
             with st.spinner("AI sedang menyusun laporan lengkap..."):
                 try:
-                    # REVISI 3: Prompt Summary Detail & Interpretatif
                     topics_str = "\n".join([f"- {t['Topik']}: {t['Keywords']}" for t in st.session_state.topic_details])
+                    # REVISI 5: Prompt Analisis Network
                     prompt = f"""
-                    Bertindaklah sebagai Data Analyst Senior. Lakukan analisis mendalam terhadap data berikut:
+                    Bertindaklah sebagai Data Analyst Senior. Analisis data berikut:
+                    KONTEKS: Tipe Teks: {text_type}. Total Data: {len(df)}. Sentimen: {sc.to_dict()}.
                     
-                    KONTEKS:
-                    - Tipe Teks: {text_type}
-                    - Total Data: {len(df)} dokumen
-                    - Statistik Sentimen: {sc.to_dict()}
-                    
-                    DETAIL TOPIK YANG DITEMUKAN (CLUSTERING):
+                    JARINGAN TOPIK & KEYWORD (NETWORK ANALYSIS):
+                    Sistem telah mengelompokkan teks ke dalam topik-topik berikut beserta kata kuncinya (Keywords saling terhubung membentuk klaster):
                     {topics_str}
                     
-                    TUGAS:
-                    Buatlah 'Executive Summary' yang komprehensif, detail, dan informatif.
-                    Struktur Laporan:
-                    1. **Gambaran Umum**: Ringkasan singkat performa sentimen dan volume data.
-                    2. **Analisis Sentimen Mendalam**: Jelaskan mengapa sentimen tertentu mendominasi.
-                    3. **Interpretasi Topik**: Jelaskan setiap topik yang ditemukan. Apa artinya? Apa hubungannya dengan kata kunci tersebut? Berikan insight di balik topik ini.
-                    4. **Kesimpulan & Rekomendasi**: Saran strategis berdasarkan data.
-                    
-                    Gunakan Bahasa Indonesia yang profesional.
+                    TUGAS: Buat Executive Summary (Bahasa Indonesia).
+                    1. **Gambaran Umum**: Performa sentimen.
+                    2. **Analisis Sentimen**: Mengapa sentimen dominan terjadi?
+                    3. **Interpretasi Network Analysis**: Jelaskan pola hubungan antar kata dan topik yang terbentuk dari data di atas. Bagaimana kata-kata kunci dalam satu topik saling berkaitan membentuk makna?
+                    4. **Kesimpulan & Rekomendasi**.
                     """
                     res = client.chat.completions.create(model=MODEL_NAME, messages=[{"role":"user", "content": prompt}])
                     st.markdown(res.choices[0].message.content)
@@ -410,10 +440,19 @@ if st.session_state.analysis_done and st.session_state.data is not None:
         fig_bar = px.bar(tc, x='Jumlah', y='Topik', orientation='h', color='Jumlah', template=plotly_template)
         st.plotly_chart(fig_bar, use_container_width=True)
         
-        # REVISI 5: Tabel Detail Topik di bawah grafik
         st.write("#### 📋 Detail Kata Kunci per Topik")
+        # REVISI 3: Desain Tabel Lebih Menarik (Interactive, No Index)
         df_topics = pd.DataFrame(st.session_state.topic_details)
-        st.table(df_topics)
+        st.dataframe(
+            df_topics, 
+            hide_index=True, 
+            use_container_width=True,
+            column_config={
+                "Nomor": st.column_config.NumberColumn("No.", width="small"),
+                "Topik": st.column_config.TextColumn("Nama Topik", width="medium"),
+                "Keywords": st.column_config.TextColumn("Kata Kunci (Keywords)", width="large")
+            }
+        )
 
     with t4:
         txt_all = " ".join(df['Teks_Clean'])
@@ -432,10 +471,8 @@ if st.session_state.analysis_done and st.session_state.data is not None:
         st.plotly_chart(fig_k, use_container_width=True)
 
     with t5:
-        # REVISI 4: Text Network Analysis Diagram
         st.subheader("🕸️ Text Network Analysis")
-        st.write("Visualisasi hubungan antara topik (node besar) dan kata kunci dominan (node kecil). Warna menunjukkan pengelompokan klaster.")
-        
+        st.write("Visualisasi hubungan antara topik (node besar) dan kata kunci dominan (node kecil).")
         if st.session_state.topic_details:
             fig_net = generate_text_network(st.session_state.topic_details, theme_mode)
             st.pyplot(fig_net)
@@ -444,4 +481,3 @@ if st.session_state.analysis_done and st.session_state.data is not None:
 
     st.divider()
     st.download_button("📥 Unduh CSV", df.to_csv(index=False).encode('utf-8'), "analisis_anatext.csv", "text/csv")
-
