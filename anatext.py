@@ -244,7 +244,7 @@ with st.sidebar:
 # --- MAIN UI ---
 col_logo, col_title = st.columns([1, 12])
 # REVISI 1: Tambah Icon
-with col_title: st.title("📊 AnaText") 
+with col_title: st.title("📝 AnaText") 
 st.write("Platform Analisis Teks Berbasis AI")
 
 try: api_key = st.secrets["OPENAI_API_KEY"]
@@ -444,3 +444,4 @@ if st.session_state.analysis_done and st.session_state.data is not None:
 
     st.divider()
     st.download_button("📥 Unduh CSV", df.to_csv(index=False).encode('utf-8'), "analisis_anatext.csv", "text/csv")
+
