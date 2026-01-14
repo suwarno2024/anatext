@@ -1,4 +1,4 @@
-streamlit>=1.37.0
+streamlit>=1.35.0
 openai
 pandas
 numpy
@@ -10,3 +10,4 @@ openpyxl
 Sastrawi
 networkx
 scipy
+
