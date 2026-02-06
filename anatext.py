@@ -748,7 +748,7 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown(
-        f'<div class="footer-text">Developed by <b>Suwarno</b><br>Powered by <b>OpenAI GPT-4o</b><br>v{APP_VERSION}</div>',
+        f'<div class="footer-text">Developed by <b>Suwarno</b><br>Powered by <b>OpenAI GPT-4o</b>',
         unsafe_allow_html=True
     )
 
@@ -1341,3 +1341,4 @@ if st.session_state.analysis_done and st.session_state.data is not None:
             )
         else:
             st.button("📥 Generate laporan dulu", disabled=True, use_container_width=True)
+
