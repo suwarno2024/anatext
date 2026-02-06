@@ -748,7 +748,7 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown(
-        f'<div class="footer-text">Developed by <b>Suwarno</b><br>Powered by <b>OpenAI GPT-4o</b><br>v{APP_VERSION}</div>',
+        f'<div class="footer-text">Developed by <b>Suwarno</b><br>Powered by <b>GPT-4o</b> & <b>GPT-4o-mini</b><br>v{APP_VERSION}</div>',
         unsafe_allow_html=True
     )
 
@@ -763,7 +763,8 @@ try:
 except Exception:
     api_key = ""
 client = OpenAI(api_key=api_key) if api_key else None
-MODEL_NAME = "gpt-4o"
+MODEL_FAST = "gpt-4o-mini"   # Sentimen, Topik Naming, NER (cepat & hemat)
+MODEL_SMART = "gpt-4o"       # Summary Komprehensif (mendalam & detail)
 
 # --- INPUT AREA ---
 container_input = st.container()
@@ -870,7 +871,7 @@ if run_analysis:
                 center = kmeans.cluster_centers_[i]
                 top_idx = center.argsort()[-10:][::-1]
                 top_w = [feats[x] for x in top_idx]
-                label = get_topic_name_ai(client, MODEL_NAME, top_w[:5]) if top_w else f"Topik {i + 1}"
+                label = get_topic_name_ai(client, MODEL_FAST, top_w[:5]) if top_w else f"Topik {i + 1}"
                 topic_map[i] = label
                 topic_data_list.append({
                     'Nomor': i + 1,
@@ -883,12 +884,12 @@ if run_analysis:
 
             # --- Sentiment AI ---
             status_text.info("⏳ Tahap 3/4: Analisis sentimen dengan AI...")
-            df['Sentimen'] = get_sentiment_ai(client, MODEL_NAME, df['Teks_Asli'].tolist())
+            df['Sentimen'] = get_sentiment_ai(client, MODEL_FAST, df['Teks_Asli'].tolist())
 
             # --- NER Analysis ---
             status_text.info("⏳ Tahap 4/4: Deteksi entitas (NER)...")
             full_text_sample = " ".join(df['Teks_Asli'].tolist())
-            ner_result = get_ner_ai(client, MODEL_NAME, full_text_sample)
+            ner_result = get_ner_ai(client, MODEL_FAST, full_text_sample)
 
             status_text.empty()
 
@@ -974,7 +975,7 @@ if st.session_state.analysis_done and st.session_state.data is not None:
             if st.button("✨ Generate Laporan Komprehensif", type="primary"):
                 with st.spinner("🤖 AI sedang menyusun laporan eksekutif..."):
                     summary = generate_ai_summary(
-                        client, MODEL_NAME, df,
+                        client, MODEL_SMART, df,
                         sc, st.session_state.topic_details,
                         st.session_state.ner_results, text_type, language
                     )
