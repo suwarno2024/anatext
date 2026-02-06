@@ -523,43 +523,32 @@ Tulis sebuah **Laporan Analisis Eksekutif** yang komprehensif dan profesional be
 
 ═══════════════ INSTRUKSI OUTPUT ═══════════════
 
-Tulis laporan analisis dengan struktur berikut. Gunakan bahasa Indonesia yang profesional, data-driven, dan insightful:
+Tulis laporan analisis dengan struktur berikut. Gunakan bahasa Indonesia yang profesional, data-driven, dan insightful.
+
+ATURAN PENTING: Setiap bagian (section) di bawah ini WAJIB ditulis sepanjang **200 hingga 250 kata**. Jangan kurang dari 200 kata dan jangan lebih dari 250 kata per bagian. Tulis secara mendalam, elaboratif, dan kaya analisis untuk memenuhi target jumlah kata tersebut.
 
 ## 📋 Ringkasan Eksekutif
-Paragraf pembuka ringkas (3-4 kalimat) yang merangkum temuan utama seluruh analisis.
+(200-250 kata) Tulis paragraf pembuka komprehensif yang merangkum seluruh temuan analisis. Sebutkan jumlah dokumen, distribusi sentimen dominan beserta persentasenya, topik-topik utama yang teridentifikasi, entitas kunci, dan pola linguistik yang menonjol. Berikan gambaran menyeluruh sehingga pembaca langsung memahami lanskap data tanpa harus membaca seluruh laporan.
 
 ## 🎭 Analisis Sentimen
-- Jelaskan distribusi sentimen dan dominansi-nya
-- Analisis MENGAPA sentimen tertentu dominan berdasarkan konteks topik dan kata kunci
-- Hubungkan sentimen dengan tipe teks ({text_type})
-- Berikan interpretasi proporsi sentimen (apakah sehat/mengkhawatirkan?)
+(200-250 kata) Jelaskan distribusi sentimen secara detail dan dominansinya. Analisis MENGAPA sentimen tertentu dominan berdasarkan konteks topik dan kata kunci. Hubungkan sentimen dengan tipe teks ({text_type}). Berikan interpretasi proporsi sentimen (apakah sehat/mengkhawatirkan?). Bandingkan rasio positif-negatif dan diskusikan implikasinya. Jelaskan potensi faktor penyebab sentimen netral jika signifikan.
 
 ## 📂 Analisis Tematik (Topik)
-- Jelaskan setiap topik dan maknanya
-- Identifikasi topik paling krusial/dominan
-- Jelaskan hubungan antar topik jika ada
+(200-250 kata) Jelaskan setiap topik yang teridentifikasi beserta makna dan konteksnya berdasarkan kata kunci yang membentuknya. Identifikasi topik paling krusial/dominan dari segi jumlah dokumen. Jelaskan hubungan dan keterkaitan antar topik jika ada. Diskusikan apakah topik-topik tersebut saling mendukung atau bertentangan, dan apa implikasinya terhadap narasi keseluruhan data.
 
 ## 🔀 Sentimen × Topik (Cross-Analysis)
-- Topik mana yang paling positif vs negatif?
-- Adakah topik kontroversial (sentimen terpolarisasi)?
-- Topik mana yang perlu perhatian prioritas?
+(200-250 kata) Analisis topik mana yang paling positif vs paling negatif berdasarkan data cross-tabulation. Identifikasi adakah topik kontroversial yang sentimennya terpolarisasi (campuran kuat positif dan negatif). Tentukan topik mana yang perlu perhatian dan prioritas penanganan. Berikan penjelasan mendalam tentang mengapa topik tertentu mendapat respons sentimen yang berbeda.
 
 ## 👤 Analisis Entitas (NER)
-- Siapa tokoh/organisasi kunci dan relevansinya?
-- Hubungan entitas dengan topik/sentimen
-- Peran lokasi yang terdeteksi
+(200-250 kata) Jelaskan siapa saja tokoh/orang kunci yang terdeteksi dan apa relevansinya dalam konteks data. Analisis organisasi/lembaga yang muncul dan perannya. Diskusikan lokasi yang terdeteksi dan hubungannya dengan narasi data. Kaitkan entitas-entitas ini dengan topik dan sentimen yang ditemukan. Jelaskan implikasi kehadiran entitas-entitas tersebut.
 
 ## 🔗 Pola Linguistik
-- Interpretasi kata & frasa dominan
-- Apa yang bisa disimpulkan dari bigram?
-- Pola bahasa apa yang muncul?
+(200-250 kata) Interpretasikan kata-kata dominan dan frasa (bigram) yang paling sering muncul. Jelaskan apa yang bisa disimpulkan dari pola penggunaan kata dan frasa tersebut. Identifikasi pola bahasa apa yang muncul secara konsisten. Diskusikan apakah ada kosakata spesifik yang menunjukkan kecenderungan tertentu dalam data. Hubungkan temuan linguistik dengan topik dan sentimen.
 
 ## 📌 Kesimpulan & Rekomendasi Strategis
-- 3-5 poin kesimpulan kunci
-- 3-5 rekomendasi aksi konkret berdasarkan temuan
-- Prioritas tindakan
+(200-250 kata) Tuliskan 3-5 poin kesimpulan kunci yang merangkum seluruh temuan. Berikan 3-5 rekomendasi aksi konkret dan spesifik berdasarkan temuan data. Tentukan prioritas tindakan dari yang paling mendesak. Sertakan justifikasi berbasis data untuk setiap rekomendasi yang diberikan.
 
-Gunakan **bold** untuk poin penting. Pastikan setiap klaim didukung oleh data yang tersedia.
+Gunakan **bold** untuk poin penting. Pastikan setiap klaim didukung oleh data kuantitatif yang tersedia.
 """
 
     try:
@@ -569,12 +558,14 @@ Gunakan **bold** untuk poin penting. Pastikan setiap klaim didukung oleh data ya
                 {"role": "system", "content": (
                     "Anda adalah konsultan data analytics senior. "
                     "Tulis laporan yang mendalam, terstruktur, dan actionable. "
-                    "Selalu kaitkan temuan dengan data kuantitatif yang diberikan."
+                    "Selalu kaitkan temuan dengan data kuantitatif yang diberikan. "
+                    "WAJIB: Setiap bagian/section harus ditulis sepanjang 200-250 kata. "
+                    "Tidak boleh kurang dari 200 kata per bagian. Elaborasi secara mendalam."
                 )},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.4,
-            max_tokens=4000
+            max_tokens=6000
         )
         return response.choices[0].message.content
     except Exception as e:
@@ -766,9 +757,6 @@ with st.sidebar:
 #                     MAIN UI
 # ============================================================
 render_elegant_header(theme_mode)
-
-# Version indicator for debugging deployment
-st.caption(f"📌 AnaText v{APP_VERSION} — jika tidak terlihat, app belum ter-redeploy.")
 
 try:
     api_key = st.secrets["OPENAI_API_KEY"]
