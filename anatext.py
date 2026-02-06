@@ -418,7 +418,7 @@ def get_ngrams(text_series, n=2, top_k=10):
 
 # 4. NER Analysis (AI)
 def get_ner_ai(client, model, text_full):
-    """Mengekstrak Named Entities menggunakan GPT-4o."""
+    """Mengekstrak Named Entities menggunakan GPT-4.1-nano."""
     try:
         text_sample = text_full[:15000]
         prompt = f"""
@@ -748,7 +748,7 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown(
-        f'<div class="footer-text">Developed by <b>Suwarno</b><br>Powered by <b>GPT-4.1</b> & <b>GPT-4o-mini</b></div>',
+        f'<div class="footer-text">Developed by <b>Suwarno</b><br>Powered by <b>GPT-4.1</b> & <b>GPT-4.1-nano</b></div>',
         unsafe_allow_html=True
     )
 
@@ -763,7 +763,7 @@ try:
 except Exception:
     api_key = ""
 client = OpenAI(api_key=api_key) if api_key else None
-MODEL_FAST = "gpt-4o-mini"   # Sentimen, Topik Naming, NER (cepat & hemat)
+MODEL_FAST = "gpt-4.1-nano"   # Sentimen, Topik Naming, NER (cepat & hemat)
 MODEL_SMART = "gpt-4.1"       # Summary Komprehensif (mendalam & detail)
 
 # --- INPUT AREA ---
@@ -1345,5 +1345,6 @@ if st.session_state.analysis_done and st.session_state.data is not None:
             )
         else:
             st.button("📥 Generate laporan dulu", disabled=True, use_container_width=True)
+
 
 
