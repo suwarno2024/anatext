@@ -748,7 +748,7 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown(
-        f'<div class="footer-text">Developed by <b>Suwarno</b><br>Powered by <b>OpenAI GPT-4o</b>',
+        f'<div class="footer-text">Developed by <b>Suwarno</b><br>Powered by <b>OpenAI GPT-4o</b><br>v{APP_VERSION}</div>',
         unsafe_allow_html=True
     )
 
@@ -816,7 +816,10 @@ with container_input:
 # ============================================================
 #                     PROCESSING
 # ============================================================
-if st.button("🚀 Lakukan Analisis", type="primary", use_container_width=True):
+col_btn, _ = st.columns([1, 3])
+with col_btn:
+    run_analysis = st.button("🚀 Lakukan Analisis", type="primary", use_container_width=True)
+if run_analysis:
     if not input_text_list:
         st.warning("⚠️ Data kosong. Silakan unggah file atau masukkan teks terlebih dahulu.")
     elif not client:
@@ -1341,6 +1344,3 @@ if st.session_state.analysis_done and st.session_state.data is not None:
             )
         else:
             st.button("📥 Generate laporan dulu", disabled=True, use_container_width=True)
-
-
-
