@@ -264,7 +264,7 @@ def render_elegant_header(mode):
         <h1 style="
             color: {title_color}; font-family: 'Inter','Helvetica Neue',sans-serif;
             font-weight: 800; font-size: 2.6rem; margin: 0; letter-spacing: -1px;
-        ">AnaText</h1>
+        ">AnaText AI</h1>
         <p style="color: {subtitle_color}; font-size: 1.05rem; margin-top: 6px; font-weight: 400; letter-spacing: 0.3px;">
             Platform Analisis Teks Berbasis AI
         </p>
@@ -1341,4 +1341,5 @@ if st.session_state.analysis_done and st.session_state.data is not None:
             )
         else:
             st.button("📥 Generate laporan dulu", disabled=True, use_container_width=True)
+
 
