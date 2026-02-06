@@ -748,7 +748,7 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown(
-        f'<div class="footer-text">Developed by <b>Suwarno</b><br>Powered by <b>GPT-4o</b> & <b>GPT-4o-mini</b><br>v{APP_VERSION}</div>',
+        f'<div class="footer-text">Developed by <b>Suwarno</b><br>Powered by <b>GPT-4.1</b> & <b>GPT-4o-mini</b><br>v{APP_VERSION}</div>',
         unsafe_allow_html=True
     )
 
@@ -764,7 +764,7 @@ except Exception:
     api_key = ""
 client = OpenAI(api_key=api_key) if api_key else None
 MODEL_FAST = "gpt-4o-mini"   # Sentimen, Topik Naming, NER (cepat & hemat)
-MODEL_SMART = "gpt-4o"       # Summary Komprehensif (mendalam & detail)
+MODEL_SMART = "gpt-4.1"       # Summary Komprehensif (mendalam & detail)
 
 # --- INPUT AREA ---
 container_input = st.container()
@@ -1345,3 +1345,4 @@ if st.session_state.analysis_done and st.session_state.data is not None:
             )
         else:
             st.button("📥 Generate laporan dulu", disabled=True, use_container_width=True)
+
